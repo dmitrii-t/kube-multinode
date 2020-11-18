@@ -1,0 +1,31 @@
+---
+- name: Installs Kube
+  hosts: localhost
+  tasks:
+  - name: Install, configure Kube
+    become: true
+    become_method: sudo
+    block:
+    - name: Add Kube GPG apt Key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+    - name: Add Kube Repository
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+    - name: Install Kube
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+    - name: Prevent Kube from being upgraded
+      dpkg_selections: name={{ item }} selection=hold
+      with_items:
+      - kubelet
+      - kubeadm
+      - kubectl
+

@@ -1,0 +1,13 @@
+---
+- name: Configures node
+  hosts: localhost
+  tasks:
+  - name: Install, configure node
+    become: true
+    become_method: sudo
+    block:
+    - name: Configure Netfilter
+      ansible.posix.sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: '1'
+        state: present 

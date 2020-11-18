@@ -1,0 +1,45 @@
+---
+- name: Installs Docker
+  hosts: localhost
+  vars:
+  - remote_user: ubuntu
+  - distro_release: "{{ hostvars[inventory_hostname].ansible_distribution_release }}"
+  tasks:
+  - name: Install, configure and start Docker
+    become: true
+    become_method: sudo
+    block:
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ distro_release }} stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+    - name: Create group
+      group:
+        name: docker
+        state: present
+    - name: Add existing user to the group docker
+      user: 
+        name: "{{ remote_user }}"
+        groups: docker
+        append: yes
+    - name: Copy Docker daemon config file
+      copy:
+        src: "files/daemon.json"
+        dest: "/etc/docker/daemon.json"
+    - name: Create Docker daemon dir
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+    - name: Reload systemd and restart Docker daemon
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes
+      
+
