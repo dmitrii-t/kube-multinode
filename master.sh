@@ -28,18 +28,13 @@ multipass exec ${NODE} -- bash -c 'kubeadm config images pull'
 multipass exec ${NODE} -- bash -c 'sudo kubeadm init --pod-network-cidr=192.178.0.0/16' 2> /dev/null
 multipass exec ${NODE} -- bash -c 'sudo cat /etc/kubernetes/admin.conf' > .kube/config
 
-# multipass exec ${NODE} -- bash -c 'sudo iptables -L -n -t nat' > .iptables/master.complete
+mv ~/.kube/config ~/.kube/config.back
+cp .kube/config ~/.kube/config
 
 echo "Installing CNI Network Plugin"
 KUBECONFIG=.kube/config kubectl create -f calico/tigera-operator.yml
 KUBECONFIG=.kube/config kubectl create -f calico/custom-resources.yml
-
 sleep 60
 KUBECONFIG=.kube/config kubectl rollout status daemonset calico-node -n calico-system
 
 multipass exec ${NODE} -- bash -c 'sudo iptables -L -n -t nat' > .iptables/master.complete
-
-# diff .iptables/master.initial .iptables/master.complete > .iptables/master.diff
-
-mv ~/.kube/config ~/.kube/config.back
-cp .kube/config ~/.kube/config
