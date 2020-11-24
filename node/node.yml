@@ -6,6 +6,16 @@
     become: true
     become_method: sudo
     block:
+    - name: Install ipvsadm
+      apt: 
+        name: ipvsadm
+        state: latest
+        update_cache: yes
+    - name: Install net-tools
+      apt: 
+        name: net-tools 
+        state: latest
+        update_cache: yes
     - name: Configure Netfilter so bridged packets will traverse iptables rules
       ansible.posix.sysctl:
         name: net.bridge.bridge-nf-call-iptables

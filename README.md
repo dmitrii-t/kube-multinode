@@ -1,1 +1,1 @@
-### Multi-node Kubernetes cluster with Multipass and Kubeadm
+### Multi-node Kubernetes cluster with Kubeadm
